@@ -550,7 +550,8 @@ venue_data_long_DE <- venue_data_long
 ```
 ## Excercise 5 
 
-First, I am removing NAs. Then I am setting the values for the longitude and the latitude to NA if they lie outside the proper boundaries. 
+
+Now, I am preparing the dataframe 'venue_data_long_DE', so that a plot can be coded. First, I am removing NAs. Then I am setting the values for the longitude and the latitude to NA if they lie outside the proper boundaries. 
 
 ``` {r exercise 5_1, message = FALSE}
 
