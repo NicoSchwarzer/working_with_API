@@ -47,3 +47,119 @@ The link to the GitHub repository is: https://github.com/NicoSchwarzer/working_w
 ## Excercise 2 
 
 On the given website, one can find different APIs. The "Discovery API" is of interest to us. This API has limits of 5000 API calls per day and rate limitation of 5 requests per second. That is why one should not run this file multiple time per day! Also, I have included a 'Sys.sleep(0.2)' command in all loop statements below, which ensures that no more than 5 request will be run per second. I have retrieved an API key from the "API Explorer" and stored it in a different file, which I would have to run first. Here, it is simply referred to as "key_1". 
+
+
+
+## Excercise 3 
+
+For aesthetic reasons, I have already installed all required packages in the beginning of this RMD-file. 
+
+### GET-request for German event venues 
+
+I use the hidden API key to retrieve the data. I first check the status code to make sure that the code works properly. Since the status is 200, the latter is the case here. I then use the 'content' command to load the content. I then transfer the data into an R list, which is stored in 'content_1'. It is a list of three and contains the sub-lists "_embedded", "_page" and "links". To construct a dataframe, one needs to retrieve data via 'content_1$'_embedded'$events'. I am storing the data in the datafame 'content_1_df'.
+
+```{r exercise 3_1, message = FALSE}
+
+
+
+get_1 <- GET("https://app.ticketmaster.com/discovery/v2/events/",
+              query = list(apikey = key_1,
+                           countryCode = "DE")) 
+
+
+print(get_1$status_code)
+
+content_1 <- content(get_1, as  = "text")
+
+content_1 <- fromJSON(content_1)
+
+content_1_df <- data.frame(content_1$'_embedded'$events)
+
+```
+
+### Extracting certain variables 
+
+The variables 'name' and 'url' can be taken directly from the above-mentioned dataframe. All other variables need to be retrieved via the dataframes contained in the DF content_1_df. All the required variables are then added to the new dataframe 'venue_data'. Furthermore, I set all empty entries to NA, so that the plotting will not results in any difficulties as one can simply ignore/remove NA-entrys then. 
+
+```{r exercise 3_2, message = FALSE}
+
+# Keeping name & url
+venue_data <- content_1_df %>%
+  select(name, url)
+
+## Retrieving more data:
+
+#city
+cities <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$city$name)) {
+    cities[i] <- NA
+  } else {
+    cities[i] <- content_1_df$X_embedded[1]$venues[[i]]$city$name
+}}
+
+
+# postal code
+postal_codes <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$postalCode)) {
+    postal_codes[i] <- NA
+  } else {
+ postal_codes[i] <- content_1_df$X_embedded[1]$venues[[i]]$postalCode
+}}
+
+
+# address
+ad <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$address$line1)) {
+    ad[i] <- NA
+  } else {
+ad[i] <-  content_1_df$X_embedded[1]$venues[[i]]$address$line1
+}}
+
+
+# longitude
+long <- rep(0, 20)
+
+for (i in 1:20) {
+  if ( is.null(content_1_df$X_embedded[1]$venues[[i]]$location$longitude)) {
+    long[i] <- NA
+  } else {
+  long[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$longitude
+  } 
+}
+
+  
+# 5 
+# latitude 
+lat <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$location$latitude)) {
+    lat[i] <- NA
+  } else {
+lat[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$latitude
+}}
+
+
+## Enlarging the new dataframe 
+venue_data$city <- cities
+venue_data$postalCode <- postal_codes
+venue_data$address <- ad
+venue_data$longitude <- long
+venue_data$latitude <- lat
+
+
+venue_data$longitude <- as.double(venue_data$longitude)
+venue_data$latitude <- as.double(venue_data$latitude)
+
+venue_data_DE <- venue_data
+
+glimpse(venue_data_DE)
+
+```
+
