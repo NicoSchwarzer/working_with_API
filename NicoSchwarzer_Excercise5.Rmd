@@ -1,0 +1,49 @@
+---
+title: "NicoSchwarzer_Excercise5"
+author: "Nico"
+date: "31 1 2021"
+output: html_document
+---
+---
+title: "Assignment 4"
+author: "Nico"
+date: "02 02 2021"
+output: html_document
+---
+
+
+## Author
+By: Nico Schwarzer, 
+Student-ID:5632297
+
+## Excercise  1 
+
+### Preparations 
+
+I first install all necessary packages. I also set the working directory and call the file 'API_key', where my API key is hidden. 
+```{r exercise 1_1, message = FALSE}
+
+library(tidyverse)
+library(jsonlite)
+library(httr)
+library(rlist)
+library(knitr)
+
+knitr::opts_knit$set(root.dir = 'C:/Users/Nico/Documents/Tübingen/1. Sem/DS Project Management/Exercises/E5/working_with_API')
+
+
+source('C:/Users/Nico/Documents/Tübingen/1. Sem/DS Project Management/Exercises/E5/API_key.R')
+
+```
+
+### Connection to GitHub 
+
+As demanded in the exercise, I have created a new GitHub repository called 'working_with_API'. It shall include a 'READ ME' file as well as the code, i.e. this document. The file, in which the API key is stored, shall not be included in this GitHub project. 
+
+The link to the GitHub repository is: https://github.com/NicoSchwarzer/working_with_API . 
+
+
+
+## Excercise 2 
+
+On the given website, one can find different APIs. The "Discovery API" is of interest to us. This API has limits of 5000 API calls per day and rate limitation of 5 requests per second. That is why one should not run this file multiple time per day! Also, I have included a 'Sys.sleep(0.2)' command in all loop statements below, which ensures that no more than 5 request will be run per second. I have retrieved an API key from the "API Explorer" and stored it in a different file, which I would have to run first. Here, it is simply referred to as "key_1". 
