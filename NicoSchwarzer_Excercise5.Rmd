@@ -163,3 +163,426 @@ glimpse(venue_data_DE)
 
 ```
 
+
+## Excercise 4 
+
+Obviously, in exercise 3, I only retrieved the first of many. This also becomes clear when considering the following command. 
+
+``` {r exercise 4_1, message = FALSE}
+
+num_pages <- content_1$page$totalPages
+print(num_pages)
+
+num_pages_1 <- num_pages - 1
+
+total_el <- content_1$page$totalElements
+
+```
+In total, there are `r num_pages`!
+
+I shall now retrieve the data of all pages. In total, there are `r total_el` elements. If this number is perfectly dividable by 20, I merely need to write a loop to iteratively get all the data of the 20 pages, which can then be stored in a dataframe. If this is not the  case, one needs to call the function one time for the last page and add the last columns to the dataframe. Since the last page somehow does not contain data, I am not considering it. For some reason, the second last page, i.e. `r num_pages_1` serves as the last oage in the sense that it may contain 1 - 20 datapoints. Since the API is constantly updated and one can thus not be sure if the total number is divisible by 20 and for reasons of replicability, I embed this structure in a large if-statement which considers the modulo operator. 
+
+The just-mentioned dataframe needs to be set up before calling the loop. To retrieve the data on all variables other than the URL and the name, one can simply re-use the code from excercise 3. 
+
+``` {r exercise 4_2, message = FALSE}
+
+n <- total_el
+
+## Preparing the dataframe 
+num_pages_2 <- num_pages - 2
+last_page <- num_pages + 1
+
+
+
+venue_data_long <- data.frame(   # calling tibble() is also possible
+  name = character(n),
+  city = character(n),
+  postalCode = character(n),
+  address = character(n),
+  url = character(n),
+  longitude = character(n),
+  latitude = character(n))
+
+
+#### calling the large if statement #### 
+
+# first considering a case of perfect dividability:
+if (n %% 20 == 0) {
+  for (a in 1:num_pages) {
+    # getting the data - per page   
+    get_1_a <- GET("https://app.ticketmaster.com/discovery/v2/events/", 
+                   query = list(apikey = key_1,
+                               countryCode = "DE",
+                                page   = a))
+    
+      
+      
+    content_1_a <- content(get_1_a, as  = "text")
+
+    content_1_a <- fromJSON(content_1_a)
+
+    content_1_df <- data.frame(content_1_a$'_embedded'$events)
+      
+    # getting the data for the columns - like in Ex. 3
+    
+   cities <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$city$name)) {
+    cities[i] <- NA
+  } else {
+    cities[i] <- content_1_df$X_embedded[1]$venues[[i]]$city$name
+}}
+
+
+# postal code
+postal_codes <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$postalCode)) {
+    postal_codes[i] <- NA
+  } else {
+ postal_codes[i] <- content_1_df$X_embedded[1]$venues[[i]]$postalCode
+}}
+
+
+# address
+ad <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$address$line1)) {
+    ad[i] <- NA
+  } else {
+ad[i] <-  content_1_df$X_embedded[1]$venues[[i]]$address$line1
+}}
+
+
+# longitude
+long <- rep(0, 20)
+
+for (i in 1:20) {
+  if ( is.null(content_1_df$X_embedded[1]$venues[[i]]$location$longitude)) {
+    long[i] <- NA
+  } else {
+  long[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$longitude
+  } 
+}
+
+  
+# 5 
+
+# latitude 
+lat <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$location$latitude)) {
+    lat[i] <- NA
+  } else {
+lat[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$latitude
+}}
+
+# name 
+name <- rep(0,20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$name[i])) {
+    name[i] <- NA
+  } else {
+name[i] <- content_1_df$name[i]
+}}
+
+# url 
+url <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$url[i])) {
+    url[i] <- NA
+  } else {
+url[i] <- content_1_df$url[i]
+}}
+
+
+    
+      # updating the corresponding part of the DF
+      venue_data_long$name[(20*a-19):(20*a)] <- name
+      venue_data_long$url[(20*a-19):(20*a)] <- url
+                        ##
+      venue_data_long$city[(20*a-19):(20*a)] <- cities
+      venue_data_long$postalCode[(20*a-19):(20*a)] <- postal_codes
+      venue_data_long$address[(20*a-19):(20*a)] <- ad
+      venue_data_long$longitude[(20*a-19):(20*a)] <- long
+      venue_data_long$latitude[(20*a-19):(20*a)] <- lat
+    
+  Sys.sleep(0.2)
+  
+    }
+  
+    
+} else {  # now considering the other case 
+  
+  # repeating the code from above 
+  for (a in 1:num_pages_2) {
+    # getting the data - per page   
+    get_1 <- GET("https://app.ticketmaster.com/discovery/v2/events/", 
+                   query = list(apikey = key_1,
+                               countryCode = "DE",
+                                page   = a))
+    
+    
+    
+    content_1_a <- content(get_1, as  = "text")
+
+    content_1_a <- fromJSON(content_1_a)
+
+    content_1_df <- data.frame(content_1_a$'_embedded'$events)
+      
+    # getting the data for the columns - like in Ex. 3
+    
+    cities <- rep(0, 20)
+
+  cities <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$city$name)) {
+    cities[i] <- NA
+  } else {
+    cities[i] <- content_1_df$X_embedded[1]$venues[[i]]$city$name
+}}
+
+
+# postal code
+postal_codes <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$postalCode)) {
+    postal_codes[i] <- NA
+  } else {
+ postal_codes[i] <- content_1_df$X_embedded[1]$venues[[i]]$postalCode
+}}
+
+
+# address
+ad <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$address$line1)) {
+    ad[i] <- NA
+  } else {
+ad[i] <-  content_1_df$X_embedded[1]$venues[[i]]$address$line1
+}}
+
+
+# longitude
+
+long <- rep(0, 20)
+
+for (i in 1:20) {
+  if ( is.null(content_1_df$X_embedded[1]$venues[[i]]$location$longitude)) {
+    long[i] <- NA
+  } else {
+  long[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$longitude
+  } 
+}
+
+
+# 5 
+
+# latitude 
+lat <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$location$latitude)) {
+    lat[i] <- NA
+  } else {
+lat[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$latitude
+}}
+
+# name 
+name <- rep(0,20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$name[i])) {
+    name[i] <- NA
+  } else {
+name[i] <- content_1_df$name[i]
+}}
+
+# url 
+url <- rep(0, 20)
+
+for (i in 1:20) {
+  if (is.null(content_1_df$url[i])) {
+    url[i] <- NA
+  } else {
+url[i] <- content_1_df$url[i]
+}}
+    
+          
+      # updating the corresponding part of the DF
+      venue_data_long$name[(20*a-19):(20*a)] <- name
+      venue_data_long$url[(20*a-19):(20*a)] <- url
+                        ##
+      venue_data_long$city[(20*a-19):(20*a)] <- cities
+      venue_data_long$postalCode[(20*a-19):(20*a)] <- postal_codes
+      venue_data_long$address[(20*a-19):(20*a)] <- ad
+      venue_data_long$longitude[(20*a-19):(20*a)] <- long
+      venue_data_long$latitude[(20*a-19):(20*a)] <- lat
+    
+  Sys.sleep(0.2)
+  }
+  
+  # getting data on the last page 
+  last_page <- a + 1 
+  
+  max <- n
+  rest <- max - ((num_pages_2+1)*20)
+  
+  almost_max <- max - rest
+  
+  get_3 <- GET("https://app.ticketmaster.com/discovery/v2/events/", 
+                   query = list(apikey = key_1,
+                               countryCode = "DE",
+                                page   = last_page))
+       
+  content_1_b <- content(get_3, as  = "text")
+
+    content_1_b <- fromJSON(content_1_b)
+
+    content_1_df <- data.frame(content_1_b$'_embedded'$events)
+    
+    
+   cities <- rep(0, rest)
+
+for (i in 1:rest) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$city$name)) {
+    cities[i] <- NA
+  } else {
+    cities[i] <- content_1_df$X_embedded[1]$venues[[i]]$city$name
+}}
+
+
+# postal code
+postal_codes <- rep(0, rest)
+
+for (i in 1:rest) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$postalCode)) {
+    postal_codes[i] <- NA
+  } else {
+ postal_codes[i] <- content_1_df$X_embedded[1]$venues[[i]]$postalCode
+}}
+
+
+# address
+ad <- rep(0, rest)
+
+for (i in 1:rest) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$address$line1)) {
+    ad[i] <- NA
+  } else {
+ad[i] <-  content_1_df$X_embedded[1]$venues[[i]]$address$line1
+}}
+
+
+# longitude
+long <- rep(0, rest)
+
+for (i in 1:rest) {
+  if ( is.null(content_1_df$X_embedded[1]$venues[[i]]$location$longitude)) {
+    long[i] <- NA
+  } else {
+  long[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$longitude
+  } 
+}
+
+  
+# 5 
+
+# latitude 
+lat <- rep(0, rest)
+
+for (i in 1:rest) {
+  if (is.null(content_1_df$X_embedded[1]$venues[[i]]$location$latitude)) {
+    lat[i] <- NA
+  } else {
+lat[i] <- content_1_df$X_embedded[1]$venues[[i]]$location$latitude
+}}
+
+# name 
+name <- rep(0,rest)
+
+for (i in 1:rest) {
+  if (is.null(content_1_df$name[i])) {
+    name[i] <- NA
+  } else {
+name[i] <- content_1_df$name[i]
+}}
+
+# url 
+url <- rep(0, rest)
+
+for (i in 1:rest) {
+  if (is.null(content_1_df$url[i])) {
+    url[i] <- NA
+  } else {
+url[i] <- content_1_df$url[i]
+  }}
+
+    
+      # updating the corresponding part of the DF
+      venue_data_long$name[almost_max:max] <- name
+      venue_data_long$url[(almost_max:max)] <- url
+                        ##
+      venue_data_long$city[almost_max:max] <- cities
+      venue_data_long$postalCode[almost_max:max] <- postal_codes
+      venue_data_long$address[almost_max:max] <- ad
+      venue_data_long$longitude[almost_max:max] <- long
+      venue_data_long$latitude[almost_max:max] <- lat
+  
+    
+}
+
+venue_data_long$longitude <- as.double(venue_data_long$longitude)
+venue_data_long$latitude <- as.double(venue_data_long$latitude)
+
+venue_data_long_DE <- venue_data_long
+
+
+```
+## Excercise 5 
+
+First, I am removing NAs. Then I am setting the values for the longitude and the latitude to NA if they lie outside the proper boundaries. 
+
+``` {r exercise 5_1, message = FALSE}
+
+venue_data_long_DE <- na.omit(venue_data_long_DE)
+
+
+venue_data_long_DE$longitude[venue_data_long_DE$longitude < 5.866944] <- NA
+venue_data_long_DE$longitude[venue_data_long_DE$longitude > 15.043611] <- NA
+
+venue_data_long_DE$latitude[venue_data_long_DE$latitude < 47.271679] <- NA
+venue_data_long_DE$latitude[venue_data_long_DE$latitude > 55.0846] <- NA
+
+
+glimpse(venue_data_long_DE)
+
+
+```
+
+Next, I am coding the graph. 
+
+``` {r exercise 5_2, message = FALSE}
+
+ggplot() + 
+  geom_polygon(
+aes(x = long, y = lat, group = group), data = map_data("world", region = "Germany"),
+fill = "grey90",color = "black") +
+theme_void() + coord_quickmap() +
+labs(title = "Event locations across Germany", caption = "Source: ticketmaster.com") +
+theme(title = element_text(size=8, face='bold'),
+plot.caption = element_text(face = "italic")) + 
+  geom_point(data = venue_data_long_DE, mapping = aes(x = longitude, y = latitude))
+  
+
+```
+
